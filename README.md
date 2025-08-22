@@ -7,14 +7,30 @@ Korištene tehnologije: **Python**, **FastAPI**, **SQLAlchemy**, **MySQL**, **Re
 
 ## Funkcionalnosti
 
-- **Korisnici:** registracija, login, ažuriranje i brisanje računa  
-- **Frizeri:** CRUD operacije, prosječna ocjena, kaskadno brisanje termina i recenzija  
-- **Usluge:** CRUD operacije za frizerske usluge  
-- **Termini:** rezervacije s povezanim korisnikom, frizerom i uslugom  
-- **Recenzije:** CRUD operacije i povezivanje s korisnikom i frizerom 
+### Korisnici
+- Registracija i login korisnika
+- CRUD operacije za korisnike
+- Sigurna pohrana lozinki (hashirane)
+
+### Frizeri
+- CRUD operacije za frizere
+- Prosječna ocjena frizera
+- Brisanje frizera automatski briše njegove termine i recenzije (kaskadno)
+
+### Usluge
+- CRUD operacije za usluge 
+
+### Termini
+- CRUD operacije za termine
+- Povezivanje termina s korisnikom, frizerom i uslugom
+
+### Recenzije
+- CRUD operacije za recenzije
+- Povezivanje recenzija s korisnikom i frizerom
 
 ---
 
 Pokretanje: docker-compose up --build
+
 API će biti dostupan na: http://localhost:8000
 
