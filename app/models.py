@@ -1,5 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text
 from sqlalchemy.orm import relationship
+from sqlalchemy import Float
+
 from .database import Base
 
 class Korisnik(Base):
@@ -18,9 +20,11 @@ class Frizer(Base):
     ime = Column(String(50), nullable=False)
     prezime = Column(String(50), nullable=False)
     specijalnost = Column(String(100), nullable=False)
+    prosjecna_ocjena = Column(Float, default=0)  # nova kolona
 
-    termini = relationship("Termin", back_populates="frizer")
-    recenzije = relationship("Recenzija", back_populates="frizer")
+    termini = relationship("Termin", back_populates="frizer", cascade="all, delete-orphan")
+    recenzije = relationship("Recenzija", back_populates="frizer",cascade="all, delete-orphan")
+
 
 class Usluga(Base):
     __tablename__ = "usluge"

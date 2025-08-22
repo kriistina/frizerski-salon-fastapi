@@ -31,6 +31,7 @@ class FrizerCreate(FrizerBase):
 
 class FrizerOut(FrizerBase):
     id: int
+    prosjecna_ocjena: float
     class Config:
         from_attributes = True
 
