@@ -1,34 +1,50 @@
-version: "3.9"
-
 services:
   fastapi:
     build: .
     ports:
       - "8000:8000"
-    volumes:
-      - .:/app
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: db2025
+      DB_NAME: frizerski_salon
+      REDIS_HOST: redis
     depends_on:
-      - mysql
-      - redis
-
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
 
   mysql:
-    image: mysql:latest
+    image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: db2025
       MYSQL_DATABASE: frizerski_salon
     ports:
       - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 10
+      start_period: 10s
 
   redis:
-    image: redis/redis-stack:latest
+    image: redis:7-alpine
     ports:
       - "6379:6379"
-      - "8001:8001"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 5
+      start_period: 5s
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    restart: always
     ports:
       - "8080:80"
     environment:
@@ -37,3 +53,7 @@ services:
       PMA_PASSWORD: db2025
     depends_on:
       - mysql
+    restart: unless-stopped
+
+volumes:
+  mysql-data:

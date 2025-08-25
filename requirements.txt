@@ -6,3 +6,4 @@ redis
 pydantic
 passlib[bcrypt]
 python-jose
+

@@ -6,6 +6,7 @@ from ..redis_client import r
 import json
 
 router = APIRouter()
+
 def get_db():
     db = SessionLocal()
     try:
@@ -13,6 +14,7 @@ def get_db():
     finally:
         db.close()
 
+# Dohvat svih recenzija sa keširanjem
 @router.get("/", response_model=list[schemas.RecenzijaOut])
 def get_recenzije(db: Session = Depends(get_db)):
     cached = r.get("sve_recenzije")
@@ -25,6 +27,7 @@ def get_recenzije(db: Session = Depends(get_db)):
     r.setex("sve_recenzije", 60, json.dumps(result))
     return result
 
+# Dohvat recenzije po ID-u
 @router.get("/{recenzija_id}", response_model=schemas.RecenzijaOut)
 def get_recenzija(recenzija_id: int, db: Session = Depends(get_db)):
     recenzija = db.query(models.Recenzija).get(recenzija_id)
@@ -32,14 +35,20 @@ def get_recenzija(recenzija_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Recenzija nije pronađena")
     return recenzija
 
+# Kreiranje nove recenzije
 @router.post("/", response_model=schemas.RecenzijaOut)
 def create_recenzija(recenzija: schemas.RecenzijaCreate, db: Session = Depends(get_db)):
     new_recenzija = models.Recenzija(**recenzija.dict())
     db.add(new_recenzija)
     db.commit()
     db.refresh(new_recenzija)
+
+    # Obriši keš jer se lista recenzija promijenila
+    r.delete("sve_recenzije")
+
     return new_recenzija
 
+# Ažuriranje recenzije
 @router.put("/{recenzija_id}", response_model=schemas.RecenzijaOut)
 def update_recenzija(recenzija_id: int, recenzija_data: schemas.RecenzijaCreate, db: Session = Depends(get_db)):
     recenzija = db.query(models.Recenzija).get(recenzija_id)
@@ -49,8 +58,13 @@ def update_recenzija(recenzija_id: int, recenzija_data: schemas.RecenzijaCreate,
         setattr(recenzija, key, value)
     db.commit()
     db.refresh(recenzija)
+
+    # Obriši keš jer se lista recenzija promijenila
+    r.delete("sve_recenzije")
+
     return recenzija
 
+# Brisanje recenzije
 @router.delete("/{recenzija_id}")
 def delete_recenzija(recenzija_id: int, db: Session = Depends(get_db)):
     recenzija = db.query(models.Recenzija).get(recenzija_id)
@@ -58,4 +72,8 @@ def delete_recenzija(recenzija_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Recenzija nije pronađena")
     db.delete(recenzija)
     db.commit()
+
+    # Obriši keš jer se lista recenzija promijenila
+    r.delete("sve_recenzije")
+
     return {"message": "Recenzija obrisana"}
